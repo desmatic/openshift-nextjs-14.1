@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Rebuild the source code only when needed
+# rebuild the source code only when needed
 FROM registry.access.redhat.com/ubi9/nodejs-20:latest AS builder
 USER 0
 WORKDIR /app
