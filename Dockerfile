@@ -1,9 +1,9 @@
-# Install dependencies only when needed
+# install dependencies only when needed
 FROM registry.access.redhat.com/ubi9/nodejs-20:latest AS deps
 USER 0
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# install dependencies based on the preferred package manager
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -11,23 +11,23 @@ RUN npm ci
 FROM registry.access.redhat.com/ubi9/nodejs-20:latest AS builder
 USER 0
 WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED 1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Build the source code
+# build the source code
 RUN npm run build
 
-# Production image, copy all the files and run next
+# production image, copy all the files and run next
 FROM registry.access.redhat.com/ubi9/nodejs-20:latest AS runner
 USER 0
 WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+
+# install image binaries
+RUN dnf install -y jq
+RUN dnf clean all
 
 COPY --from=builder /app/app ./app
 COPY --from=builder /app/public ./public
