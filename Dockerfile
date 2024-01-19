@@ -4,13 +4,8 @@ USER 0
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM registry.access.redhat.com/ubi9/nodejs-20:latest AS builder
@@ -24,29 +19,23 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# If using npm comment out above and use below instead
+# Build the source code
 RUN npm run build
 
 # Production image, copy all the files and run next
 FROM registry.access.redhat.com/ubi9/nodejs-20:latest AS runner
 USER 0
 WORKDIR /app
-
 ENV NODE_ENV production
-# Uncomment the following line in case you want to enable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED 1
 
+COPY --from=builder /app/app ./app
 COPY --from=builder /app/public ./public
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=1001:1001 /app/.next/standalone ./
-COPY --from=builder --chown=1001:1001 /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
 USER 1001
-
 EXPOSE 3000
-
 ENV PORT 3000
-
-CMD ["node", "server.js"]
+CMD ["npm", "run", "start"]
