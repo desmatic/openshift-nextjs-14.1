@@ -1,5 +1,7 @@
 ## gcp cloudbuild
 ```bash
-gcloud builds submit --config=cloudbuild.yaml \
-  --substitutions=_LOCATION="us-east1",_REPOSITORY="my-repo",_IMAGE="nextjs14" .
+export REGION=europe-west2 
+gcloud builds submit --region=${REGION} --config=cloudbuild.yaml \
+  --gcs-source-staging-dir="gs://${GOOGLE_CLOUD_PROJECT}_cloudbuild/source" \
+  --substitutions=_LOCATION="${REGION}",_REPOSITORY="nextjs",_IMAGE="nextjs14" .
 ```
