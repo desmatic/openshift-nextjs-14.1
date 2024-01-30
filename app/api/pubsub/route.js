@@ -11,8 +11,11 @@ export async function GET(request) {
     return Response.json(echo)
 }
 
+
 export async function POST(request) {
-    const body = await request.json()
-    console.log(JSON.stringify(body))
-    return Response.json(body)
+    const { message } = await request.json()
+    const data = JSON.parse(atob(message.data))
+
+    console.log(json.stringify(data))
+    return Response.json(message)
 }

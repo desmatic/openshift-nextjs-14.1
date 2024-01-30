@@ -26,7 +26,7 @@ ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # install image binaries
-RUN dnf install -y jq
+RUN dnf install -y bzip2 zip
 RUN dnf clean all
 
 COPY --from=builder /app/app ./app
