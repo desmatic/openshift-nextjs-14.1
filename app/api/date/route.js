@@ -5,10 +5,12 @@ const exec = promisify(execAsync)
 export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
-    //const url = new URL(request.url)
-    const message = {}
-    const date = await exec('./app/scripts/date.sh');
-    //message['stdout'] = stdout
+    let date = {}
+    try {
+        date = await exec('./app/scripts/date.sh')
+    } catch (e) {
+        console.error(e)
+    }
 
     return Response.json(date)
 }
