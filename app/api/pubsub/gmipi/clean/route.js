@@ -42,7 +42,7 @@ export async function POST(request) {
         try {
             const data = JSON.parse(atob(message.data))
             const infile = '/tmp/' + data.name.split('/').reverse()[0] + ".input"
-            const outfile = '/tmp/' + data.name.split('/').reverse()[0] + ".output"
+            let outfile = '/tmp/' + data.name.split('/').reverse()[0] + ".output"
             await downloadFile(data.bucket, data.name, infile)
             let invalid = false
             try {
